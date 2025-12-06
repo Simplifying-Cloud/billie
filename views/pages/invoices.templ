@@ -1,0 +1,404 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/dscott/invoicey/internal/mock"
+	"github.com/dscott/invoicey/views/layouts"
+	"github.com/dscott/invoicey/views/components/ui"
+	"github.com/dscott/invoicey/views/components/icons"
+)
+
+templ InvoicesList(invoices []mock.Invoice, currentStatus string) {
+	@layouts.Base("Invoices", "/invoices") {
+		<div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+			<!-- Header -->
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+				<div>
+					<h1 class="text-2xl lg:text-3xl font-display font-bold">Invoices</h1>
+					<p class="text-stone-500 dark:text-stone-400 mt-1">Create and manage your invoices</p>
+				</div>
+				<div class="flex gap-3">
+					@ui.ButtonLink("/invoices/new", ui.ButtonProps{Variant: ui.ButtonPrimary}) {
+						@icons.Plus("w-4 h-4")
+						<span>New Invoice</span>
+					}
+				</div>
+			</div>
+
+			<!-- Status Tabs -->
+			@ui.Card("") {
+				@ui.CardBody("py-3") {
+					<div class="flex flex-wrap gap-2" hx-target="#invoices-table-body" hx-swap="innerHTML">
+						@statusTab("All", "", currentStatus == "" || currentStatus == "all")
+						@statusTab("Draft", "draft", currentStatus == "draft")
+						@statusTab("Sent", "sent", currentStatus == "sent")
+						@statusTab("Paid", "paid", currentStatus == "paid")
+						@statusTab("Overdue", "overdue", currentStatus == "overdue")
+					</div>
+				}
+			}
+
+			<!-- Invoices Table -->
+			@ui.Card("overflow-hidden") {
+				@ui.Table("") {
+					@ui.TableHeader() {
+						<tr>
+							@ui.TableHeaderCell("") { Invoice }
+							@ui.TableHeaderCell("hidden sm:table-cell") { Client }
+							@ui.TableHeaderCell("") { Status }
+							@ui.TableHeaderCell("hidden md:table-cell") { Due Date }
+							@ui.TableHeaderCell("text-right") { Amount }
+							@ui.TableHeaderCell("w-10") { }
+						</tr>
+					}
+					@ui.TableBody("invoices-table-body") {
+						@InvoicesTableBodyContent(invoices)
+					}
+				}
+			}
+		</div>
+	}
+}
+
+templ statusTab(label string, status string, active bool) {
+	<button
+		hx-get={ "/invoices?status=" + status }
+		class={
+			"px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+			templ.KV("bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm", active),
+			templ.KV("text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800", !active),
+		}
+	>
+		{ label }
+	</button>
+}
+
+templ InvoicesTableBody(invoices []mock.Invoice) {
+	@InvoicesTableBodyContent(invoices)
+}
+
+templ InvoicesTableBodyContent(invoices []mock.Invoice) {
+	if len(invoices) == 0 {
+		@ui.TableEmpty("No invoices found", "Create your first invoice", "")
+	} else {
+		for _, inv := range invoices {
+			@ui.TableRowLink("/invoices/" + inv.ID, "") {
+				@ui.TableCell("") {
+					<div>
+						<p class="font-medium">{ inv.Number }</p>
+						<p class="text-sm text-stone-500 dark:text-stone-400 sm:hidden">
+							if inv.Client != nil {
+								{ inv.Client.Company }
+							}
+						</p>
+					</div>
+				}
+				@ui.TableCell("hidden sm:table-cell") {
+					if inv.Client != nil {
+						<div class="flex items-center gap-3">
+							<div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-semibold text-xs">
+								{ getInitials(inv.Client.Name) }
+							</div>
+							<div class="min-w-0">
+								<p class="font-medium truncate">{ inv.Client.Company }</p>
+								<p class="text-sm text-stone-500 dark:text-stone-400 truncate">{ inv.Client.Name }</p>
+							</div>
+						</div>
+					}
+				}
+				@ui.TableCell("") {
+					@ui.StatusBadge(string(inv.Status))
+				}
+				@ui.TableCell("hidden md:table-cell text-stone-500 dark:text-stone-400") {
+					{ formatDate(inv.DueDate) }
+				}
+				@ui.TableCell("text-right font-mono font-medium") {
+					{ formatCurrency(inv.Total) }
+				}
+				@ui.TableCell("") {
+					<div class="relative" x-data="{ open: false }">
+						<button @click.stop="open = !open" class="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
+							@icons.MoreHorizontal("w-4 h-4 text-stone-400")
+						</button>
+						<div
+							x-show="open"
+							x-transition
+							@click.outside="open = false"
+							class="absolute right-0 mt-2 w-48 bg-white dark:bg-stone-900 rounded-xl shadow-lg border border-stone-200 dark:border-stone-800 py-1 z-10"
+						>
+							<a href={ templ.SafeURL("/invoices/" + inv.ID) } class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-stone-50 dark:hover:bg-stone-800">
+								@icons.Edit("w-4 h-4")
+								<span>Edit</span>
+							</a>
+							<a href={ templ.SafeURL("/p/" + inv.PublicToken) } target="_blank" class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-stone-50 dark:hover:bg-stone-800">
+								@icons.ExternalLink("w-4 h-4")
+								<span>View Public</span>
+							</a>
+							<button class="flex items-center gap-2 px-4 py-2 text-sm hover:bg-stone-50 dark:hover:bg-stone-800 w-full text-left">
+								@icons.Copy("w-4 h-4")
+								<span>Duplicate</span>
+							</button>
+							<button class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 w-full text-left">
+								@icons.Trash2("w-4 h-4")
+								<span>Delete</span>
+							</button>
+						</div>
+					</div>
+				}
+			}
+		}
+	}
+}
+
+templ InvoiceEditor(invoice *mock.Invoice) {
+	@layouts.Base(editorTitle(invoice), "/invoices") {
+		<div
+			class="p-6 lg:p-8 max-w-7xl mx-auto"
+			x-data={`{
+				items: ` + getInitialLineItems(invoice) + `,
+				taxRate: 8.25,
+				get subtotal() {
+					return this.items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0), 0);
+				},
+				get tax() {
+					return this.subtotal * (this.taxRate / 100);
+				},
+				get total() {
+					return this.subtotal + this.tax;
+				},
+				formatCurrency(value) {
+					return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+				},
+				addItem() {
+					this.items.push({ id: Date.now(), description: '', quantity: 1, rate: 0 });
+				},
+				removeItem(id) {
+					if (this.items.length > 1) {
+						this.items = this.items.filter(item => item.id !== id);
+					}
+				}
+			}`}
+		>
+			<!-- Header -->
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+				<div>
+					<a href="/invoices" class="inline-flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors mb-2">
+						@icons.ArrowLeft("w-4 h-4")
+						<span>Back to Invoices</span>
+					</a>
+					<h1 class="text-2xl lg:text-3xl font-display font-bold">
+						if invoice != nil {
+							Edit { invoice.Number }
+						} else {
+							New Invoice
+						}
+					</h1>
+				</div>
+				<div class="flex gap-3">
+					@ui.Button(ui.ButtonProps{Variant: ui.ButtonGhost}) {
+						Save Draft
+					}
+					@ui.Button(ui.ButtonProps{Variant: ui.ButtonPrimary}) {
+						@icons.Send("w-4 h-4")
+						<span>Send Invoice</span>
+					}
+				</div>
+			</div>
+
+			<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<!-- Form -->
+				<div class="lg:col-span-2 space-y-6">
+					<!-- Client Selection -->
+					@ui.Card("") {
+						@ui.CardHeader("") {
+							@ui.CardTitle("") { Client Information }
+						}
+						@ui.CardBody("") {
+							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+								@ui.FormGroup("sm:col-span-2") {
+									@ui.Label("client", true) { Client }
+									@ui.Select(ui.InputProps{Name: "client", ID: "client", Required: true}) {
+										<option value="">Select a client...</option>
+										for _, c := range mock.Clients {
+											<option value={ c.ID } selected?={ invoice != nil && invoice.ClientID == c.ID }>{ c.Name } - { c.Company }</option>
+										}
+									}
+								}
+								@ui.FormGroup("") {
+									@ui.Label("issue_date", true) { Issue Date }
+									@ui.Input(ui.InputProps{Type: "date", Name: "issue_date", ID: "issue_date", Required: true})
+								}
+								@ui.FormGroup("") {
+									@ui.Label("due_date", true) { Due Date }
+									@ui.Input(ui.InputProps{Type: "date", Name: "due_date", ID: "due_date", Required: true})
+								}
+							</div>
+						}
+					}
+
+					<!-- Line Items -->
+					@ui.Card("") {
+						@ui.CardHeader("") {
+							@ui.CardTitle("") { Line Items }
+						}
+						@ui.CardBody("") {
+							<!-- Headers (desktop) -->
+							<div class="hidden sm:grid grid-cols-12 gap-4 mb-3 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+								<div class="col-span-5">Description</div>
+								<div class="col-span-2 text-right">Qty</div>
+								<div class="col-span-2 text-right">Rate</div>
+								<div class="col-span-2 text-right">Amount</div>
+								<div class="col-span-1"></div>
+							</div>
+
+							<!-- Items -->
+							<template x-for="(item, index) in items" :key="item.id">
+								<div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4 p-4 sm:p-0 bg-stone-50 dark:bg-stone-800/30 sm:bg-transparent rounded-xl sm:rounded-none">
+									<div class="sm:col-span-5">
+										<label class="sm:hidden text-xs font-medium text-stone-500 dark:text-stone-400 mb-1 block">Description</label>
+										<input
+											x-model="item.description"
+											type="text"
+											placeholder="Service description..."
+											class="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+										/>
+									</div>
+									<div class="sm:col-span-2">
+										<label class="sm:hidden text-xs font-medium text-stone-500 dark:text-stone-400 mb-1 block">Quantity</label>
+										<input
+											x-model.number="item.quantity"
+											type="number"
+											min="0"
+											step="1"
+											class="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-right font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+										/>
+									</div>
+									<div class="sm:col-span-2">
+										<label class="sm:hidden text-xs font-medium text-stone-500 dark:text-stone-400 mb-1 block">Rate ($)</label>
+										<input
+											x-model.number="item.rate"
+											type="number"
+											min="0"
+											step="0.01"
+											class="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-right font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+										/>
+									</div>
+									<div class="sm:col-span-2 flex items-center justify-between sm:justify-end">
+										<span class="sm:hidden text-xs font-medium text-stone-500 dark:text-stone-400">Amount</span>
+										<span class="font-mono font-medium text-right" x-text="formatCurrency(item.quantity * item.rate)"></span>
+									</div>
+									<div class="sm:col-span-1 flex items-center justify-end">
+										<button
+											@click="removeItem(item.id)"
+											type="button"
+											class="p-2 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+											:disabled="items.length === 1"
+											:class="{ 'opacity-30 cursor-not-allowed': items.length === 1 }"
+										>
+											@icons.Trash2("w-4 h-4")
+										</button>
+									</div>
+								</div>
+							</template>
+
+							<!-- Add Item Button -->
+							<button
+								@click="addItem()"
+								type="button"
+								class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium text-sm mt-4"
+							>
+								@icons.Plus("w-4 h-4")
+								<span>Add Line Item</span>
+							</button>
+						}
+					}
+
+					<!-- Notes -->
+					@ui.Card("") {
+						@ui.CardHeader("") {
+							@ui.CardTitle("") { Notes }
+						}
+						@ui.CardBody("") {
+							@ui.FormGroup("") {
+								<textarea
+									name="notes"
+									rows="3"
+									placeholder="Add any notes or payment instructions..."
+									class="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 resize-none"
+								>{ getInvoiceNotes(invoice) }</textarea>
+							}
+						}
+					}
+				</div>
+
+				<!-- Summary -->
+				<div class="lg:col-span-1">
+					<div class="sticky top-24">
+						@ui.Card("") {
+							@ui.CardHeader("") {
+								@ui.CardTitle("") { Summary }
+							}
+							@ui.CardBody("") {
+								<div class="space-y-3">
+									<div class="flex justify-between text-sm">
+										<span class="text-stone-500 dark:text-stone-400">Subtotal</span>
+										<span class="font-mono" x-text="formatCurrency(subtotal)">$0.00</span>
+									</div>
+									<div class="flex justify-between text-sm">
+										<span class="text-stone-500 dark:text-stone-400">Tax (<span x-text="taxRate"></span>%)</span>
+										<span class="font-mono" x-text="formatCurrency(tax)">$0.00</span>
+									</div>
+									<div class="border-t border-stone-200 dark:border-stone-800 pt-3">
+										<div class="flex justify-between">
+											<span class="font-display font-semibold">Total</span>
+											<span class="font-mono font-bold text-lg text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(total)">$0.00</span>
+										</div>
+									</div>
+								</div>
+							}
+						}
+
+						<!-- Quick Actions -->
+						<div class="mt-4 space-y-2">
+							@ui.Button(ui.ButtonProps{Variant: ui.ButtonPrimary, Class: "w-full justify-center"}) {
+								@icons.Send("w-4 h-4")
+								<span>Send Invoice</span>
+							}
+							@ui.Button(ui.ButtonProps{Variant: ui.ButtonOutline, Class: "w-full justify-center"}) {
+								@icons.Eye("w-4 h-4")
+								<span>Preview</span>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+func editorTitle(invoice *mock.Invoice) string {
+	if invoice != nil {
+		return "Edit " + invoice.Number
+	}
+	return "New Invoice"
+}
+
+func getInitialLineItems(invoice *mock.Invoice) string {
+	if invoice != nil && len(invoice.LineItems) > 0 {
+		return `[
+			{id: 1, description: "` + invoice.LineItems[0].Description + `", quantity: ` + formatFloat(invoice.LineItems[0].Quantity) + `, rate: ` + formatFloat(invoice.LineItems[0].Rate) + `}
+		]`
+	}
+	return `[{id: 1, description: '', quantity: 1, rate: 0}]`
+}
+
+func formatFloat(f float64) string {
+	return fmt.Sprintf("%.2f", f)
+}
+
+func getInvoiceNotes(invoice *mock.Invoice) string {
+	if invoice != nil {
+		return invoice.Notes
+	}
+	return ""
+}

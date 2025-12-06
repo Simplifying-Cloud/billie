@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go version:*)",
+      "WebSearch",
+      "WebFetch(domain:franken-ui.dev)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

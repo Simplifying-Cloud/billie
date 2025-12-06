@@ -1,0 +1,70 @@
+package ui
+
+type BadgeVariant string
+
+const (
+	BadgeDefault  BadgeVariant = "default"
+	BadgeSuccess  BadgeVariant = "success"
+	BadgeWarning  BadgeVariant = "warning"
+	BadgeDanger   BadgeVariant = "danger"
+	BadgeInfo     BadgeVariant = "info"
+	BadgeMuted    BadgeVariant = "muted"
+)
+
+func badgeClasses(variant BadgeVariant, class string) string {
+	base := "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+
+	var variantClass string
+	switch variant {
+	case BadgeSuccess:
+		variantClass = "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 dark:ring-emerald-500/30"
+	case BadgeWarning:
+		variantClass = "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20 dark:ring-amber-500/30"
+	case BadgeDanger:
+		variantClass = "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/20 dark:ring-red-500/30"
+	case BadgeInfo:
+		variantClass = "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 dark:ring-blue-500/30"
+	case BadgeMuted:
+		variantClass = "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 ring-1 ring-inset ring-stone-500/20"
+	default:
+		variantClass = "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-1 ring-inset ring-stone-500/20"
+	}
+
+	return base + " " + variantClass + " " + class
+}
+
+templ Badge(variant BadgeVariant, class string) {
+	<span class={ badgeClasses(variant, class) }>
+		{ children... }
+	</span>
+}
+
+// Invoice status badge with specific styling
+templ StatusBadge(status string) {
+	switch status {
+		case "draft":
+			@Badge(BadgeMuted, "") {
+				<span class="w-1.5 h-1.5 rounded-full bg-stone-400 mr-1.5"></span>
+				Draft
+			}
+		case "sent":
+			@Badge(BadgeInfo, "") {
+				<span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5"></span>
+				Sent
+			}
+		case "paid":
+			@Badge(BadgeSuccess, "") {
+				<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+				Paid
+			}
+		case "overdue":
+			@Badge(BadgeDanger, "") {
+				<span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5 animate-pulse"></span>
+				Overdue
+			}
+		default:
+			@Badge(BadgeDefault, "") {
+				{ status }
+			}
+	}
+}

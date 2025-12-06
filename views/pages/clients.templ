@@ -1,0 +1,254 @@
+package pages
+
+import (
+	"fmt"
+	"time"
+	"github.com/dscott/invoicey/internal/mock"
+	"github.com/dscott/invoicey/views/layouts"
+	"github.com/dscott/invoicey/views/components/ui"
+	"github.com/dscott/invoicey/views/components/icons"
+)
+
+templ ClientsList(clients []mock.Client) {
+	@layouts.Base("Clients", "/clients") {
+		<div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+			<!-- Header -->
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+				<div>
+					<h1 class="text-2xl lg:text-3xl font-display font-bold">Clients</h1>
+					<p class="text-stone-500 dark:text-stone-400 mt-1">Manage your client relationships</p>
+				</div>
+				<div class="flex gap-3">
+					@ui.ModalTrigger("new-client", "inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 px-4 py-2.5 text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40") {
+						@icons.Plus("w-4 h-4")
+						<span>New Client</span>
+					}
+				</div>
+			</div>
+
+			<!-- Search -->
+			@ui.Card("") {
+				@ui.CardBody("") {
+					@ui.SearchInput(ui.InputProps{
+						Name:        "q",
+						Placeholder: "Search clients by name, company, or email...",
+						HxGet:       "/clients/search",
+						HxTrigger:   "input changed delay:300ms, search",
+						HxTarget:    "#clients-table-body",
+					})
+				}
+			}
+
+			<!-- Clients Table -->
+			@ui.Card("overflow-hidden") {
+				@ui.Table("") {
+					@ui.TableHeader() {
+						<tr>
+							@ui.TableHeaderCell("") { Client }
+							@ui.TableHeaderCell("hidden md:table-cell") { Email }
+							@ui.TableHeaderCell("hidden lg:table-cell") { Company }
+							@ui.TableHeaderCell("text-right") { Total Billed }
+							@ui.TableHeaderCell("text-center") { Invoices }
+							@ui.TableHeaderCell("w-10") { }
+						</tr>
+					}
+					@ui.TableBody("clients-table-body") {
+						@ClientsTableBodyContent(clients)
+					}
+				}
+			}
+
+			<!-- New Client Modal -->
+			@ui.Modal("new-client", "Add New Client") {
+				<form class="space-y-4" hx-post="/clients" hx-target="#clients-table-body" hx-swap="innerHTML">
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						@ui.FormGroup("") {
+							@ui.Label("name", true) { Full Name }
+							@ui.Input(ui.InputProps{Name: "name", ID: "name", Placeholder: "John Doe", Required: true})
+						}
+						@ui.FormGroup("") {
+							@ui.Label("email", true) { Email }
+							@ui.Input(ui.InputProps{Type: "email", Name: "email", ID: "email", Placeholder: "john@example.com", Required: true})
+						}
+					</div>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						@ui.FormGroup("") {
+							@ui.Label("company", false) { Company }
+							@ui.Input(ui.InputProps{Name: "company", ID: "company", Placeholder: "Acme Inc."})
+						}
+						@ui.FormGroup("") {
+							@ui.Label("phone", false) { Phone }
+							@ui.Input(ui.InputProps{Type: "tel", Name: "phone", ID: "phone", Placeholder: "(555) 123-4567"})
+						}
+					</div>
+					@ui.FormGroup("") {
+						@ui.Label("address", false) { Address }
+						@ui.Input(ui.InputProps{Name: "address", ID: "address", Placeholder: "123 Main St, City, State 12345"})
+					}
+					<div class="flex justify-end gap-3 pt-4">
+						@ui.Button(ui.ButtonProps{Variant: ui.ButtonGhost, Class: "modal-close"}) {
+							Cancel
+						}
+						@ui.Button(ui.ButtonProps{Variant: ui.ButtonPrimary, Type: "submit"}) {
+							Create Client
+						}
+					</div>
+				</form>
+			}
+		</div>
+	}
+}
+
+templ ClientsTableBody(clients []mock.Client) {
+	@ClientsTableBodyContent(clients)
+}
+
+templ ClientsTableBodyContent(clients []mock.Client) {
+	if len(clients) == 0 {
+		@ui.TableEmpty("No clients found", "Add your first client", "new-client")
+	} else {
+		for _, client := range clients {
+			@ui.TableRowLink("/clients/" + client.ID, "") {
+				@ui.TableCell("") {
+					<div class="flex items-center gap-3">
+						<div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-semibold text-sm flex-shrink-0">
+							{ getInitials(client.Name) }
+						</div>
+						<div class="min-w-0">
+							<p class="font-medium truncate">{ client.Name }</p>
+							<p class="text-sm text-stone-500 dark:text-stone-400 truncate md:hidden">{ client.Email }</p>
+						</div>
+					</div>
+				}
+				@ui.TableCell("hidden md:table-cell text-stone-500 dark:text-stone-400") {
+					{ client.Email }
+				}
+				@ui.TableCell("hidden lg:table-cell") {
+					<div class="flex items-center gap-2">
+						@icons.Building("w-4 h-4 text-stone-400")
+						<span>{ client.Company }</span>
+					</div>
+				}
+				@ui.TableCell("text-right font-mono") {
+					{ formatCurrency(client.TotalBilled) }
+				}
+				@ui.TableCell("text-center") {
+					<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-sm font-medium">
+						{ fmt.Sprintf("%d", client.InvoiceCount) }
+					</span>
+				}
+				@ui.TableCell("") {
+					<button class="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" onclick="event.stopPropagation()">
+						@icons.MoreHorizontal("w-4 h-4 text-stone-400")
+					</button>
+				}
+			}
+		}
+	}
+}
+
+templ ClientDetail(client mock.Client, invoices []mock.Invoice) {
+	@layouts.Base(client.Name, "/clients") {
+		<div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+			<!-- Back button -->
+			<a href="/clients" class="inline-flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+				@icons.ArrowLeft("w-4 h-4")
+				<span>Back to Clients</span>
+			</a>
+
+			<!-- Client Header -->
+			<div class="flex flex-col sm:flex-row sm:items-start gap-6">
+				<div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-bold text-2xl flex-shrink-0">
+					{ getInitials(client.Name) }
+				</div>
+				<div class="flex-1">
+					<h1 class="text-2xl lg:text-3xl font-display font-bold">{ client.Name }</h1>
+					<p class="text-lg text-stone-500 dark:text-stone-400">{ client.Company }</p>
+					<div class="flex flex-wrap gap-4 mt-4">
+						<div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
+							@icons.Mail("w-4 h-4")
+							<span>{ client.Email }</span>
+						</div>
+						<div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
+							@icons.Phone("w-4 h-4")
+							<span>{ client.Phone }</span>
+						</div>
+						<div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
+							@icons.MapPin("w-4 h-4")
+							<span>{ client.Address.City }, { client.Address.State }</span>
+						</div>
+					</div>
+				</div>
+				<div class="flex gap-3">
+					@ui.Button(ui.ButtonProps{Variant: ui.ButtonGhost}) {
+						@icons.Edit("w-4 h-4")
+						<span>Edit</span>
+					}
+					@ui.ButtonLink("/invoices/new?client="+client.ID, ui.ButtonProps{Variant: ui.ButtonPrimary}) {
+						@icons.Plus("w-4 h-4")
+						<span>New Invoice</span>
+					}
+				</div>
+			</div>
+
+			<!-- Stats -->
+			<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+				@ui.Card("") {
+					@ui.CardBody("text-center") {
+						<p class="text-3xl font-display font-bold text-emerald-600 dark:text-emerald-400">{ formatCurrency(client.TotalBilled) }</p>
+						<p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Total Billed</p>
+					}
+				}
+				@ui.Card("") {
+					@ui.CardBody("text-center") {
+						<p class="text-3xl font-display font-bold">{ fmt.Sprintf("%d", client.InvoiceCount) }</p>
+						<p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Invoices</p>
+					}
+				}
+				@ui.Card("") {
+					@ui.CardBody("text-center") {
+						<p class="text-3xl font-display font-bold">{ formatDate(client.CreatedAt) }</p>
+						<p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Client Since</p>
+					}
+				}
+			</div>
+
+			<!-- Invoices -->
+			@ui.Card("overflow-hidden") {
+				@ui.CardHeader("") {
+					@ui.CardTitle("") {
+						Invoices
+					}
+				}
+				@ui.Table("") {
+					@ui.TableHeader() {
+						<tr>
+							@ui.TableHeaderCell("") { Number }
+							@ui.TableHeaderCell("") { Status }
+							@ui.TableHeaderCell("hidden sm:table-cell") { Date }
+							@ui.TableHeaderCell("text-right") { Amount }
+						</tr>
+					}
+					@ui.TableBody("") {
+						if len(invoices) == 0 {
+							@ui.TableEmpty("No invoices yet", "", "")
+						} else {
+							for _, inv := range invoices {
+								@ui.TableRowLink("/invoices/" + inv.ID, "") {
+									@ui.TableCell("font-medium") { { inv.Number } }
+									@ui.TableCell("") { @ui.StatusBadge(string(inv.Status)) }
+									@ui.TableCell("hidden sm:table-cell text-stone-500 dark:text-stone-400") { { formatDate(inv.IssueDate) } }
+									@ui.TableCell("text-right font-mono") { { formatCurrency(inv.Total) } }
+								}
+							}
+						}
+					}
+				}
+			}
+		</div>
+	}
+}
+
+func formatDate(t time.Time) string {
+	return t.Format("Jan 2, 2006")
+}

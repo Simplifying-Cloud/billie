@@ -1,0 +1,44 @@
+package ui
+
+templ Card(class string) {
+	<div class={ "bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/50 dark:border-stone-800/50 shadow-sm " + class }>
+		{ children... }
+	</div>
+}
+
+templ CardHeader(class string) {
+	<div class={ "px-6 py-4 border-b border-stone-200/50 dark:border-stone-800/50 " + class }>
+		{ children... }
+	</div>
+}
+
+templ CardTitle(class string) {
+	<h3 class={ "font-display font-semibold text-lg " + class }>
+		{ children... }
+	</h3>
+}
+
+templ CardDescription(class string) {
+	<p class={ "text-sm text-stone-500 dark:text-stone-400 mt-1 " + class }>
+		{ children... }
+	</p>
+}
+
+templ CardBody(class string) {
+	<div class={ "p-6 " + class }>
+		{ children... }
+	</div>
+}
+
+templ CardFooter(class string) {
+	<div class={ "px-6 py-4 border-t border-stone-200/50 dark:border-stone-800/50 bg-stone-50/50 dark:bg-stone-800/30 rounded-b-2xl " + class }>
+		{ children... }
+	</div>
+}
+
+// Glass card variant for featured sections
+templ CardGlass(class string) {
+	<div class={ "bg-white/70 dark:bg-stone-900/70 backdrop-blur-xl rounded-2xl border border-stone-200/50 dark:border-stone-800/50 shadow-xl " + class }>
+		{ children... }
+	</div>
+}

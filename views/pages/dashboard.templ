@@ -1,0 +1,389 @@
+package pages
+
+import (
+	"fmt"
+	"strings"
+	"time"
+	"github.com/dscott/invoicey/internal/mock"
+	"github.com/dscott/invoicey/views/layouts"
+	"github.com/dscott/invoicey/views/components/ui"
+	"github.com/dscott/invoicey/views/components/icons"
+)
+
+type DashboardData struct {
+	Metrics        mock.DashboardMetrics
+	RecentInvoices []mock.Invoice
+	RecentClients  []mock.Client
+	RecentExpenses []mock.Expense
+	ChartData      mock.ChartData
+}
+
+templ Dashboard(data DashboardData) {
+	@layouts.Base("Dashboard", "/") {
+		<div class="p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
+			<!-- Header -->
+			<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+				<div>
+					<h1 class="text-2xl lg:text-3xl font-display font-bold">Dashboard</h1>
+					<p class="text-stone-500 dark:text-stone-400 mt-1">Welcome back! Here's what's happening in { fmt.Sprintf("%d", currentYear()) }.</p>
+				</div>
+				<div class="flex gap-3">
+					@ui.ButtonLink("/expenses", ui.ButtonProps{Variant: ui.ButtonSecondary}) {
+						@icons.Receipt("w-4 h-4")
+						<span>New Expense</span>
+					}
+					@ui.ButtonLink("/invoices/new", ui.ButtonProps{Variant: ui.ButtonPrimary}) {
+						@icons.Plus("w-4 h-4")
+						<span>New Invoice</span>
+					}
+				</div>
+			</div>
+
+			<!-- Metrics Grid -->
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+				@metricCard("Total Revenue", formatCurrency(data.Metrics.TotalRevenue), data.Metrics.RevenueChange, "emerald", icons.DollarSign)
+				@metricCard("Outstanding Invoices", formatCurrency(data.Metrics.OutstandingAmount), data.Metrics.OutstandingChange, "amber", icons.Clock)
+				@metricCard("Total Expenses", formatCurrency(data.Metrics.TotalExpenses), data.Metrics.ExpensesChange, "rose", icons.Receipt)
+				@metricCard("Upcoming Expenses", formatCurrency(data.Metrics.UpcomingExpenses), data.Metrics.UpcomingChange, "blue", icons.Calendar)
+			</div>
+
+			<!-- Charts Section -->
+			<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<!-- Revenue Chart -->
+				@ui.Card("lg:col-span-2") {
+					@ui.CardHeader("") {
+						<div class="flex items-center justify-between">
+							@ui.CardTitle("") {
+								Revenue Overview
+							}
+							<select class="text-sm bg-transparent border-0 text-stone-500 dark:text-stone-400 focus:ring-0 cursor-pointer">
+								<option>Last 6 months</option>
+								<option>Last 12 months</option>
+								<option>This year</option>
+							</select>
+						</div>
+					}
+					@ui.CardBody("") {
+						<div class="h-64">
+							<canvas id="revenueChart"></canvas>
+						</div>
+					}
+				}
+
+				<!-- Status Distribution -->
+				@ui.Card("") {
+					@ui.CardHeader("") {
+						@ui.CardTitle("") {
+							Invoice Status
+						}
+					}
+					@ui.CardBody("") {
+						<div class="h-64 flex items-center justify-center">
+							<canvas id="statusChart"></canvas>
+						</div>
+					}
+				}
+			</div>
+
+			<!-- Quick Actions & Recent Items -->
+			<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<!-- Recent Invoices -->
+				@ui.Card("") {
+					@ui.CardHeader("") {
+						<div class="flex items-center justify-between">
+							@ui.CardTitle("") {
+								Recent Invoices
+							}
+							<a href="/invoices" class="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
+								View all
+							</a>
+						</div>
+					}
+					@ui.CardBody("p-0") {
+						<div class="divide-y divide-stone-100 dark:divide-stone-800/50">
+							for _, inv := range data.RecentInvoices {
+								<a href={ templ.SafeURL("/invoices/" + inv.ID) } class="flex items-center justify-between px-6 py-4 hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+									<div class="flex items-center gap-4">
+										<div class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+											@icons.FileText("w-5 h-5 text-stone-500")
+										</div>
+										<div>
+											<p class="font-medium">{ inv.Number }</p>
+											<p class="text-sm text-stone-500 dark:text-stone-400">
+												if inv.Client != nil {
+													{ inv.Client.Company }
+												}
+											</p>
+										</div>
+									</div>
+									<div class="text-right">
+										<p class="font-mono font-medium">{ formatCurrency(inv.Total) }</p>
+										@ui.StatusBadge(string(inv.Status))
+									</div>
+								</a>
+							}
+						</div>
+					}
+				}
+
+				<!-- Recent Clients -->
+				@ui.Card("") {
+					@ui.CardHeader("") {
+						<div class="flex items-center justify-between">
+							@ui.CardTitle("") {
+								Recent Clients
+							}
+							<a href="/clients" class="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
+								View all
+							</a>
+						</div>
+					}
+					@ui.CardBody("p-0") {
+						<div class="divide-y divide-stone-100 dark:divide-stone-800/50">
+							for _, client := range data.RecentClients {
+								<a href={ templ.SafeURL("/clients/" + client.ID) } class="flex items-center gap-4 px-6 py-4 hover:bg-stone-50/50 dark:hover:bg-stone-800/30 transition-colors">
+									<div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-semibold text-sm">
+										{ getInitials(client.Name) }
+									</div>
+									<div class="flex-1 min-w-0">
+										<p class="font-medium truncate">{ client.Name }</p>
+										<p class="text-sm text-stone-500 dark:text-stone-400 truncate">{ client.Company }</p>
+									</div>
+									<p class="font-mono text-sm text-stone-500 dark:text-stone-400">{ formatCurrency(client.TotalBilled) }</p>
+								</a>
+							}
+						</div>
+					}
+				}
+
+				<!-- Recent Expenses -->
+				@ui.Card("") {
+					@ui.CardHeader("") {
+						<div class="flex items-center justify-between">
+							@ui.CardTitle("") {
+								Recent Expenses
+							}
+							<a href="/expenses" class="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
+								View all
+							</a>
+						</div>
+					}
+					@ui.CardBody("p-0") {
+						<div class="divide-y divide-stone-100 dark:divide-stone-800/50">
+							for _, exp := range data.RecentExpenses {
+								<div class="flex items-center justify-between px-6 py-4">
+									<div class="flex items-center gap-4">
+										<div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center">
+											@icons.Receipt("w-5 h-5 text-rose-500")
+										</div>
+										<div>
+											<p class="font-medium">{ exp.Description }</p>
+											<p class="text-sm text-stone-500 dark:text-stone-400">{ formatDate(exp.Date) }</p>
+										</div>
+									</div>
+									<p class="font-mono font-medium text-rose-600 dark:text-rose-400">-{ formatCurrency(exp.Amount) }</p>
+								</div>
+							}
+						</div>
+					}
+				}
+			</div>
+		</div>
+
+		<!-- Charts Script -->
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+				// Detect dark mode for chart text colors
+				const isDark = document.documentElement.classList.contains('dark');
+				const textColor = isDark ? '#a8a29e' : '#57534e';
+				const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+
+				// Revenue Chart - Full Year
+				const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+				new Chart(revenueCtx, {
+					type: 'line',
+					data: {
+						labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+						datasets: [{
+							label: 'Revenue',
+							data: [8500, 12200, 9800, 15100, 11500, 14200, 12500, 18200, 15800, 22100, 19500, 23200],
+							borderColor: '#10b981',
+							backgroundColor: 'rgba(16, 185, 129, 0.1)',
+							fill: true,
+							tension: 0.4,
+							pointBackgroundColor: '#10b981',
+							pointBorderColor: isDark ? '#1c1917' : '#fff',
+							pointBorderWidth: 2,
+							pointRadius: 3,
+							pointHoverRadius: 5
+						}, {
+							label: 'Expenses',
+							data: [1200, 980, 1450, 1100, 1350, 1600, 2100, 1800, 2400, 2200, 2800, 1450],
+							borderColor: '#f43f5e',
+							backgroundColor: 'rgba(244, 63, 94, 0.1)',
+							fill: true,
+							tension: 0.4,
+							pointBackgroundColor: '#f43f5e',
+							pointBorderColor: isDark ? '#1c1917' : '#fff',
+							pointBorderWidth: 2,
+							pointRadius: 3,
+							pointHoverRadius: 5
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								display: true,
+								position: 'top',
+								align: 'end',
+								labels: {
+									usePointStyle: true,
+									padding: 20,
+									color: textColor,
+									font: { weight: '500' }
+								}
+							}
+						},
+						scales: {
+							x: {
+								grid: { display: false },
+								border: { display: false },
+								ticks: {
+									color: textColor,
+									font: { size: 11 }
+								}
+							},
+							y: {
+								grid: { color: gridColor },
+								border: { display: false },
+								ticks: {
+									color: textColor,
+									font: { size: 11 },
+									callback: function(value) {
+										return '$' + value.toLocaleString();
+									}
+								}
+							}
+						}
+					}
+				});
+
+				// Status Chart
+				const statusCtx = document.getElementById('statusChart').getContext('2d');
+				new Chart(statusCtx, {
+					type: 'doughnut',
+					data: {
+						labels: ['Paid', 'Sent', 'Draft', 'Overdue'],
+						datasets: [{
+							data: [2, 2, 2, 1],
+							backgroundColor: ['#10b981', '#3b82f6', '#a1a1aa', '#f43f5e'],
+							borderWidth: 0,
+							spacing: 2
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						cutout: '70%',
+						plugins: {
+							legend: {
+								position: 'bottom',
+								labels: {
+									usePointStyle: true,
+									padding: 16,
+									color: textColor,
+									font: { size: 12, weight: '500' }
+								}
+							}
+						}
+					}
+				});
+			});
+		</script>
+	}
+}
+
+templ metricCard(title string, value string, change float64, color string, icon func(string) templ.Component) {
+	<div class="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/50 dark:border-stone-800/50 p-6 shadow-sm hover:shadow-md transition-shadow">
+		<div class="flex items-center justify-between mb-4">
+			<div class={ "p-3 rounded-xl", templ.KV("bg-emerald-50 dark:bg-emerald-500/10", color == "emerald"), templ.KV("bg-amber-50 dark:bg-amber-500/10", color == "amber"), templ.KV("bg-blue-50 dark:bg-blue-500/10", color == "blue"), templ.KV("bg-rose-50 dark:bg-rose-500/10", color == "rose") }>
+				@icon(metricIconClass(color))
+			</div>
+			@trendBadge(change)
+		</div>
+		<p class="text-2xl lg:text-3xl font-display font-bold tracking-tight">{ value }</p>
+		<p class="text-sm text-stone-500 dark:text-stone-400 mt-1">{ title }</p>
+	</div>
+}
+
+templ trendBadge(change float64) {
+	if change >= 0 {
+		<div class="flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+			@icons.TrendingUp("w-4 h-4")
+			<span>{ fmt.Sprintf("+%.1f%%", change) }</span>
+		</div>
+	} else {
+		<div class="flex items-center gap-1 text-sm font-medium text-rose-600 dark:text-rose-400">
+			@icons.TrendingDown("w-4 h-4")
+			<span>{ fmt.Sprintf("%.1f%%", change) }</span>
+		</div>
+	}
+}
+
+func metricIconClass(color string) string {
+	switch color {
+	case "emerald":
+		return "w-6 h-6 text-emerald-600 dark:text-emerald-400"
+	case "amber":
+		return "w-6 h-6 text-amber-600 dark:text-amber-400"
+	case "blue":
+		return "w-6 h-6 text-blue-600 dark:text-blue-400"
+	case "rose":
+		return "w-6 h-6 text-rose-600 dark:text-rose-400"
+	default:
+		return "w-6 h-6 text-stone-600 dark:text-stone-400"
+	}
+}
+
+func formatCurrency(amount float64) string {
+	// Format with 2 decimal places
+	str := fmt.Sprintf("%.2f", amount)
+
+	// Split into integer and decimal parts
+	parts := strings.Split(str, ".")
+	intPart := parts[0]
+	decPart := parts[1]
+
+	// Add thousand separators
+	var result []byte
+	for i, c := range intPart {
+		if i > 0 && (len(intPart)-i)%3 == 0 {
+			result = append(result, ',')
+		}
+		result = append(result, byte(c))
+	}
+
+	return "$" + string(result) + "." + decPart
+}
+
+func getInitials(name string) string {
+	if len(name) == 0 {
+		return "?"
+	}
+	initials := ""
+	words := []rune(name)
+	initials += string(words[0])
+	for i, r := range words {
+		if r == ' ' && i+1 < len(words) {
+			initials += string(words[i+1])
+			break
+		}
+	}
+	return initials
+}
+
+func currentYear() int {
+	return time.Now().Year()
+}

@@ -1,0 +1,114 @@
+package ui
+
+type InputProps struct {
+	Type        string
+	Name        string
+	ID          string
+	Placeholder string
+	Value       string
+	Required    bool
+	Disabled    bool
+	Class       string
+	HxGet       string
+	HxTrigger   string
+	HxTarget    string
+}
+
+templ Input(props InputProps) {
+	<input
+		type={ getInputType(props.Type) }
+		name={ props.Name }
+		id={ props.ID }
+		placeholder={ props.Placeholder }
+		value={ props.Value }
+		required?={ props.Required }
+		disabled?={ props.Disabled }
+		class={ inputClasses(props.Class) }
+		if props.HxGet != "" {
+			hx-get={ props.HxGet }
+		}
+		if props.HxTrigger != "" {
+			hx-trigger={ props.HxTrigger }
+		}
+		if props.HxTarget != "" {
+			hx-target={ props.HxTarget }
+		}
+	/>
+}
+
+func getInputType(t string) string {
+	if t == "" {
+		return "text"
+	}
+	return t
+}
+
+func inputClasses(extra string) string {
+	return "w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 dark:focus:border-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed " + extra
+}
+
+templ Label(forID string, required bool) {
+	<label for={ forID } class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">
+		{ children... }
+		if required {
+			<span class="text-red-500 ml-0.5">*</span>
+		}
+	</label>
+}
+
+templ FormGroup(class string) {
+	<div class={ "space-y-1.5 " + class }>
+		{ children... }
+	</div>
+}
+
+templ Textarea(props InputProps, rows int) {
+	<textarea
+		name={ props.Name }
+		id={ props.ID }
+		placeholder={ props.Placeholder }
+		required?={ props.Required }
+		disabled?={ props.Disabled }
+		rows={ templ.Attributes{"rows": rows}["rows"].(string) }
+		class={ inputClasses(props.Class) + " resize-none" }
+	>{ props.Value }</textarea>
+}
+
+templ Select(props InputProps) {
+	<select
+		name={ props.Name }
+		id={ props.ID }
+		required?={ props.Required }
+		disabled?={ props.Disabled }
+		class={ inputClasses(props.Class) + " cursor-pointer" }
+	>
+		{ children... }
+	</select>
+}
+
+templ SearchInput(props InputProps) {
+	<div class="relative">
+		<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+			<svg class="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+			</svg>
+		</div>
+		<input
+			type="search"
+			name={ props.Name }
+			id={ props.ID }
+			placeholder={ props.Placeholder }
+			value={ props.Value }
+			class={ "w-full pl-11 pr-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-200 " + props.Class }
+			if props.HxGet != "" {
+				hx-get={ props.HxGet }
+			}
+			if props.HxTrigger != "" {
+				hx-trigger={ props.HxTrigger }
+			}
+			if props.HxTarget != "" {
+				hx-target={ props.HxTarget }
+			}
+		/>
+	</div>
+}

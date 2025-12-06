@@ -1,0 +1,102 @@
+package ui
+
+type ButtonVariant string
+
+const (
+	ButtonPrimary     ButtonVariant = "primary"
+	ButtonSecondary   ButtonVariant = "secondary"
+	ButtonGhost       ButtonVariant = "ghost"
+	ButtonDestructive ButtonVariant = "destructive"
+	ButtonOutline     ButtonVariant = "outline"
+)
+
+type ButtonSize string
+
+const (
+	ButtonSm ButtonSize = "sm"
+	ButtonMd ButtonSize = "md"
+	ButtonLg ButtonSize = "lg"
+)
+
+type ButtonProps struct {
+	Variant  ButtonVariant
+	Size     ButtonSize
+	Class    string
+	Disabled bool
+	Type     string
+	HxGet    string
+	HxPost   string
+	HxTarget string
+	HxSwap   string
+}
+
+func buttonClasses(props ButtonProps) string {
+	base := "inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-stone-900 disabled:opacity-50 disabled:pointer-events-none"
+
+	var variant string
+	switch props.Variant {
+	case ButtonPrimary:
+		variant = "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:shadow-emerald-500/20"
+	case ButtonSecondary:
+		variant = "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
+	case ButtonGhost:
+		variant = "text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100"
+	case ButtonDestructive:
+		variant = "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/25 hover:shadow-red-500/40"
+	case ButtonOutline:
+		variant = "border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+	default:
+		variant = "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+	}
+
+	var size string
+	switch props.Size {
+	case ButtonSm:
+		size = "px-3 py-1.5 text-sm"
+	case ButtonLg:
+		size = "px-6 py-3 text-base"
+	default:
+		size = "px-4 py-2.5 text-sm"
+	}
+
+	return base + " " + variant + " " + size + " " + props.Class
+}
+
+templ Button(props ButtonProps) {
+	<button
+		type={ getButtonType(props.Type) }
+		class={ buttonClasses(props) }
+		disabled?={ props.Disabled }
+		if props.HxGet != "" {
+			hx-get={ props.HxGet }
+		}
+		if props.HxPost != "" {
+			hx-post={ props.HxPost }
+		}
+		if props.HxTarget != "" {
+			hx-target={ props.HxTarget }
+		}
+		if props.HxSwap != "" {
+			hx-swap={ props.HxSwap }
+		}
+	>
+		{ children... }
+	</button>
+}
+
+func getButtonType(t string) string {
+	if t == "" {
+		return "button"
+	}
+	return t
+}
+
+// Link styled as button
+templ ButtonLink(href string, props ButtonProps) {
+	<a
+		href={ templ.SafeURL(href) }
+		class={ buttonClasses(props) }
+	>
+		{ children... }
+	</a>
+}

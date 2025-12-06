@@ -1,0 +1,72 @@
+package ui
+
+templ Modal(id string, title string) {
+	<div
+		x-data={ "{ open: false }" }
+		x-on:open-modal.window={ "if ($event.detail === '" + id + "') open = true" }
+		x-on:close-modal.window={ "if ($event.detail === '" + id + "') open = false" }
+		x-on:keydown.escape.window="open = false"
+		class="relative z-50"
+	>
+		<!-- Backdrop -->
+		<div
+			x-show="open"
+			x-transition:enter="transition ease-out duration-300"
+			x-transition:enter-start="opacity-0"
+			x-transition:enter-end="opacity-100"
+			x-transition:leave="transition ease-in duration-200"
+			x-transition:leave-start="opacity-100"
+			x-transition:leave-end="opacity-0"
+			class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm"
+			@click="open = false"
+		></div>
+
+		<!-- Modal -->
+		<div
+			x-show="open"
+			x-transition:enter="transition ease-out duration-300"
+			x-transition:enter-start="opacity-0 scale-95"
+			x-transition:enter-end="opacity-100 scale-100"
+			x-transition:leave="transition ease-in duration-200"
+			x-transition:leave-start="opacity-100 scale-100"
+			x-transition:leave-end="opacity-0 scale-95"
+			class="fixed inset-0 overflow-y-auto"
+		>
+			<div class="flex min-h-full items-center justify-center p-4">
+				<div
+					class="w-full max-w-lg bg-white dark:bg-stone-900 rounded-2xl shadow-2xl border border-stone-200/50 dark:border-stone-800/50"
+					@click.stop
+				>
+					<!-- Header -->
+					<div class="flex items-center justify-between px-6 py-4 border-b border-stone-200/50 dark:border-stone-800/50">
+						<h2 class="text-lg font-display font-semibold">{ title }</h2>
+						<button
+							@click="open = false"
+							class="p-2 -mr-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</div>
+
+					<!-- Content -->
+					<div class="p-6">
+						{ children... }
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// Simple modal trigger button
+templ ModalTrigger(modalId string, class string) {
+	<button
+		type="button"
+		@click={ "$dispatch('open-modal', '" + modalId + "')" }
+		class={ class }
+	>
+		{ children... }
+	</button>
+}

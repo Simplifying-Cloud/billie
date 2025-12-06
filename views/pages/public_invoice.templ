@@ -1,0 +1,308 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/dscott/invoicey/internal/mock"
+	"github.com/dscott/invoicey/views/layouts"
+	"github.com/dscott/invoicey/views/components/icons"
+)
+
+templ PublicInvoice(invoice mock.Invoice) {
+	@layouts.Public("Invoice " + invoice.Number + " | Billie") {
+		<div
+			class="min-h-screen py-8 px-4"
+			x-data="{
+				paymentOpen: false,
+				paymentStep: 'form',
+				cardNumber: '',
+				expiry: '',
+				cvv: '',
+				name: '',
+				async processPayment() {
+					this.paymentStep = 'processing';
+					await new Promise(resolve => setTimeout(resolve, 2500));
+					this.paymentStep = 'success';
+				}
+			}"
+		>
+			<div class="max-w-3xl mx-auto">
+				<!-- Header -->
+				<div class="flex items-center justify-between mb-8">
+					<a href="/" class="flex items-center gap-3 group">
+						@icons.Logo()
+						<span class="text-xl font-display font-bold tracking-tight group-hover:text-emerald-600 transition-colors">Billie</span>
+					</a>
+					<div class="flex items-center gap-3">
+						<button class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Download PDF">
+							@icons.Download("w-5 h-5 text-stone-500")
+						</button>
+						<button class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Print">
+							<svg class="w-5 h-5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<!-- Invoice Card -->
+				<div class="bg-white dark:bg-stone-900 rounded-3xl shadow-2xl shadow-stone-200/50 dark:shadow-stone-950/50 border border-stone-200/50 dark:border-stone-800/50 overflow-hidden">
+					<!-- Status Banner -->
+					if invoice.Status == mock.StatusPaid {
+						<div class="bg-emerald-500 text-white text-center py-2 text-sm font-medium">
+							This invoice has been paid. Thank you!
+						</div>
+					} else if invoice.Status == mock.StatusOverdue {
+						<div class="bg-red-500 text-white text-center py-2 text-sm font-medium">
+							This invoice is overdue. Please pay as soon as possible.
+						</div>
+					}
+
+					<div class="p-8 lg:p-12">
+						<!-- Invoice Header -->
+						<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-10">
+							<div>
+								<h1 class="text-3xl font-display font-bold text-stone-900 dark:text-stone-100">INVOICE</h1>
+								<p class="text-lg text-stone-500 dark:text-stone-400 mt-1">{ invoice.Number }</p>
+							</div>
+							<div class="text-left sm:text-right">
+								<div class="flex items-center gap-2 sm:justify-end mb-2">
+									@icons.Logo()
+									<span class="text-xl font-display font-bold">Billie</span>
+								</div>
+								<p class="text-sm text-stone-500 dark:text-stone-400">Your Business Name</p>
+								<p class="text-sm text-stone-500 dark:text-stone-400">123 Business Street</p>
+								<p class="text-sm text-stone-500 dark:text-stone-400">City, State 12345</p>
+							</div>
+						</div>
+
+						<!-- Client & Dates -->
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-10">
+							<div>
+								<p class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">Bill To</p>
+								if invoice.Client != nil {
+									<p class="font-display font-semibold text-lg">{ invoice.Client.Name }</p>
+									<p class="text-stone-600 dark:text-stone-400">{ invoice.Client.Company }</p>
+									<p class="text-stone-500 dark:text-stone-500 text-sm mt-1">{ invoice.Client.Email }</p>
+									<p class="text-stone-500 dark:text-stone-500 text-sm">
+										{ invoice.Client.Address.Street }<br/>
+										{ invoice.Client.Address.City }, { invoice.Client.Address.State } { invoice.Client.Address.Zip }
+									</p>
+								}
+							</div>
+							<div class="sm:text-right">
+								<div class="grid grid-cols-2 sm:grid-cols-1 gap-4">
+									<div>
+										<p class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">Issue Date</p>
+										<p class="font-medium">{ formatDate(invoice.IssueDate) }</p>
+									</div>
+									<div>
+										<p class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-1">Due Date</p>
+										<p class="font-medium">{ formatDate(invoice.DueDate) }</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Line Items -->
+						<div class="border border-stone-200 dark:border-stone-800 rounded-2xl overflow-hidden mb-8">
+							<table class="w-full">
+								<thead class="bg-stone-50 dark:bg-stone-800/50">
+									<tr>
+										<th class="px-6 py-4 text-left text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Description</th>
+										<th class="px-6 py-4 text-right text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider hidden sm:table-cell">Qty</th>
+										<th class="px-6 py-4 text-right text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider hidden sm:table-cell">Rate</th>
+										<th class="px-6 py-4 text-right text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Amount</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-stone-200 dark:divide-stone-800">
+									for _, item := range invoice.LineItems {
+										<tr>
+											<td class="px-6 py-4">
+												<p class="font-medium">{ item.Description }</p>
+												<p class="text-sm text-stone-500 dark:text-stone-400 sm:hidden">
+													{ fmt.Sprintf("%.0f", item.Quantity) } × { formatCurrency(item.Rate) }
+												</p>
+											</td>
+											<td class="px-6 py-4 text-right font-mono text-stone-600 dark:text-stone-400 hidden sm:table-cell">{ fmt.Sprintf("%.0f", item.Quantity) }</td>
+											<td class="px-6 py-4 text-right font-mono text-stone-600 dark:text-stone-400 hidden sm:table-cell">{ formatCurrency(item.Rate) }</td>
+											<td class="px-6 py-4 text-right font-mono font-medium">{ formatCurrency(item.Amount) }</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+
+						<!-- Totals -->
+						<div class="flex justify-end">
+							<div class="w-full sm:w-72">
+								<div class="flex justify-between py-2 text-sm">
+									<span class="text-stone-500 dark:text-stone-400">Subtotal</span>
+									<span class="font-mono">{ formatCurrency(invoice.Subtotal) }</span>
+								</div>
+								<div class="flex justify-between py-2 text-sm">
+									<span class="text-stone-500 dark:text-stone-400">Tax ({ fmt.Sprintf("%.2f", invoice.TaxRate) }%)</span>
+									<span class="font-mono">{ formatCurrency(invoice.TaxAmount) }</span>
+								</div>
+								<div class="flex justify-between py-3 border-t border-stone-200 dark:border-stone-800 mt-2">
+									<span class="font-display font-semibold text-lg">Total Due</span>
+									<span class="font-mono font-bold text-xl text-emerald-600 dark:text-emerald-400">{ formatCurrency(invoice.Total) }</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Notes -->
+						if invoice.Notes != "" {
+							<div class="mt-8 pt-8 border-t border-stone-200 dark:border-stone-800">
+								<p class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">Notes</p>
+								<p class="text-stone-600 dark:text-stone-400">{ invoice.Notes }</p>
+							</div>
+						}
+					</div>
+
+					<!-- Pay Button -->
+					if invoice.Status != mock.StatusPaid {
+						<div class="px-8 lg:px-12 pb-8 lg:pb-12">
+							<button
+								@click="paymentOpen = true"
+								class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-display font-semibold text-lg shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:from-emerald-500 hover:to-teal-400 transition-all duration-300 flex items-center justify-center gap-3"
+							>
+								@icons.CreditCard("w-6 h-6")
+								<span>Pay Now - { formatCurrency(invoice.Total) }</span>
+							</button>
+						</div>
+					}
+				</div>
+
+				<!-- Footer -->
+				<div class="mt-8 text-center text-sm text-stone-500 dark:text-stone-400">
+					<p>Powered by <a href="/" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">Billie</a></p>
+				</div>
+			</div>
+
+			<!-- Payment Modal -->
+			<div
+				x-show="paymentOpen"
+				x-transition:enter="transition ease-out duration-300"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				x-transition:leave="transition ease-in duration-200"
+				x-transition:leave-start="opacity-100"
+				x-transition:leave-end="opacity-0"
+				class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/70 backdrop-blur-sm"
+				@keydown.escape.window="paymentOpen = false; paymentStep = 'form'"
+			>
+				<div
+					x-show="paymentOpen"
+					x-transition:enter="transition ease-out duration-300"
+					x-transition:enter-start="opacity-0 scale-95"
+					x-transition:enter-end="opacity-100 scale-100"
+					x-transition:leave="transition ease-in duration-200"
+					x-transition:leave-start="opacity-100 scale-100"
+					x-transition:leave-end="opacity-0 scale-95"
+					@click.stop
+					class="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden"
+				>
+					<!-- Form Step -->
+					<div x-show="paymentStep === 'form'" x-transition>
+						<div class="p-6 border-b border-stone-200 dark:border-stone-800">
+							<div class="flex items-center justify-between">
+								<div>
+									<h2 class="text-xl font-display font-semibold">Payment Details</h2>
+									<p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Invoice { invoice.Number }</p>
+								</div>
+								<button
+									@click="paymentOpen = false"
+									class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+								>
+									@icons.X("w-5 h-5")
+								</button>
+							</div>
+						</div>
+						<div class="p-6 space-y-4">
+							<div>
+								<label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Card Number</label>
+								<input
+									x-model="cardNumber"
+									type="text"
+									placeholder="1234 5678 9012 3456"
+									class="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+								/>
+							</div>
+							<div class="grid grid-cols-2 gap-4">
+								<div>
+									<label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Expiry</label>
+									<input
+										x-model="expiry"
+										type="text"
+										placeholder="MM/YY"
+										class="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+									/>
+								</div>
+								<div>
+									<label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">CVV</label>
+									<input
+										x-model="cvv"
+										type="text"
+										placeholder="123"
+										class="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+									/>
+								</div>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Name on Card</label>
+								<input
+									x-model="name"
+									type="text"
+									placeholder="John Doe"
+									class="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500"
+								/>
+							</div>
+						</div>
+						<div class="p-6 bg-stone-50 dark:bg-stone-800/30">
+							<div class="flex justify-between items-center mb-4">
+								<span class="text-stone-500 dark:text-stone-400">Amount to pay</span>
+								<span class="font-mono font-bold text-xl text-emerald-600 dark:text-emerald-400">{ formatCurrency(invoice.Total) }</span>
+							</div>
+							<button
+								@click="processPayment()"
+								class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300"
+							>
+								Pay { formatCurrency(invoice.Total) }
+							</button>
+							<p class="text-xs text-stone-500 dark:text-stone-400 text-center mt-4">
+								<svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+								</svg>
+								Secured with SSL encryption
+							</p>
+						</div>
+					</div>
+
+					<!-- Processing Step -->
+					<div x-show="paymentStep === 'processing'" x-transition class="p-12 text-center">
+						<div class="w-16 h-16 mx-auto mb-6">
+							@icons.Loader2("w-16 h-16 text-emerald-600 dark:text-emerald-400 animate-spin")
+						</div>
+						<h3 class="text-xl font-display font-semibold">Processing Payment</h3>
+						<p class="text-stone-500 dark:text-stone-400 mt-2">Please wait while we process your payment...</p>
+					</div>
+
+					<!-- Success Step -->
+					<div x-show="paymentStep === 'success'" x-transition class="p-12 text-center">
+						<div class="w-20 h-20 mx-auto mb-6 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center">
+							@icons.Check("w-10 h-10 text-emerald-600 dark:text-emerald-400")
+						</div>
+						<h3 class="text-2xl font-display font-bold text-emerald-600 dark:text-emerald-400">Payment Successful!</h3>
+						<p class="text-stone-500 dark:text-stone-400 mt-2 mb-6">Thank you for your payment. A receipt has been sent to your email.</p>
+						<button
+							@click="paymentOpen = false; paymentStep = 'form'"
+							class="px-6 py-3 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+						>
+							Close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
