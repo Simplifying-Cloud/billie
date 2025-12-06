@@ -53,7 +53,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " | Billie</title><link rel=\"stylesheet\" href=\"/static/css/output.css\"><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.min.js\" defer></script><script src=\"/static/js/chart.min.js\"></script><!-- Initialize dark mode before page loads to prevent flash --><script>\n\t\t\t\tif (window.matchMedia('(prefers-color-scheme: dark)').matches) {\n\t\t\t\t\tdocument.documentElement.classList.add('dark');\n\t\t\t\t}\n\t\t\t</script></head><body class=\"h-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased\" x-data=\"{\n\t\t\t\tsidebarOpen: false,\n\t\t\t\ttheme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),\n\t\t\t\ttoggleTheme() {\n\t\t\t\t\tthis.theme = this.theme === 'dark' ? 'light' : 'dark';\n\t\t\t\t\tlocalStorage.setItem('theme', this.theme);\n\t\t\t\t\tdocument.documentElement.classList.toggle('dark', this.theme === 'dark');\n\t\t\t\t}\n\t\t\t}\" x-init=\"document.documentElement.classList.toggle('dark', theme === 'dark')\"><!-- Gradient background accent --><div class=\"fixed inset-0 -z-10 overflow-hidden pointer-events-none\"><div class=\"absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl\"></div><div class=\"absolute top-1/2 -left-40 w-96 h-96 bg-teal-500/10 dark:bg-teal-500/5 rounded-full blur-3xl\"></div></div><!-- Mobile header --><header class=\"lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-800/50\"><div class=\"flex items-center justify-between h-16 px-4\"><button @click=\"sidebarOpen = true\" class=\"p-2 -ml-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " | Billie</title><link rel=\"stylesheet\" href=\"/static/css/output.css\"><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.min.js\" defer></script><script src=\"/static/js/chart.min.js\"></script><!-- Initialize dark mode before page loads to prevent flash --><script>\n\t\t\t\t(function() {\n\t\t\t\t\tvar theme = localStorage.getItem('theme');\n\t\t\t\t\tif (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {\n\t\t\t\t\t\tdocument.documentElement.classList.add('dark');\n\t\t\t\t\t} else {\n\t\t\t\t\t\tdocument.documentElement.classList.remove('dark');\n\t\t\t\t\t}\n\t\t\t\t})();\n\t\t\t</script></head><body class=\"h-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased\" x-data=\"{\n\t\t\t\tsidebarOpen: false,\n\t\t\t\tsidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',\n\t\t\t\ttheme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),\n\t\t\t\ttoggleTheme() {\n\t\t\t\t\tthis.theme = this.theme === 'dark' ? 'light' : 'dark';\n\t\t\t\t\tlocalStorage.setItem('theme', this.theme);\n\t\t\t\t\tdocument.documentElement.classList.toggle('dark', this.theme === 'dark');\n\t\t\t\t},\n\t\t\t\ttoggleSidebar() {\n\t\t\t\t\tthis.sidebarCollapsed = !this.sidebarCollapsed;\n\t\t\t\t\tlocalStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);\n\t\t\t\t}\n\t\t\t}\" x-init=\"document.documentElement.classList.toggle('dark', theme === 'dark')\"><!-- Gradient background accent --><div class=\"fixed inset-0 -z-10 overflow-hidden pointer-events-none\"><div class=\"absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl\"></div><div class=\"absolute top-1/2 -left-40 w-96 h-96 bg-teal-500/10 dark:bg-teal-500/5 rounded-full blur-3xl\"></div></div><!-- Mobile header --><header class=\"lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-800/50\"><div class=\"flex items-center justify-between h-16 px-4\"><button @click=\"sidebarOpen = true\" class=\"p-2 -ml-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"text-xl font-display font-bold tracking-tight\">Billie</span></a> <button @click=\"toggleTheme()\" class=\"p-2 -mr-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\"><template x-if=\"theme === 'dark'\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"text-xl font-display font-bold tracking-tight\">Billie</span></a> <button @click=\"toggleTheme()\" class=\"p-2 -mr-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\"><span class=\"hidden dark:block\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -77,7 +77,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</template><template x-if=\"theme === 'light'\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span> <span class=\"block dark:hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +85,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</template></button></div></header><!-- Mobile sidebar overlay --><div x-show=\"sidebarOpen\" x-transition:enter=\"transition-opacity ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"transition-opacity ease-in duration-200\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"sidebarOpen = false\" class=\"lg:hidden fixed inset-0 z-40 bg-stone-900/60 backdrop-blur-sm\"></div><!-- Sidebar --><aside class=\"fixed top-0 left-0 z-50 h-full w-72 bg-white dark:bg-stone-900 border-r border-stone-200/50 dark:border-stone-800/50 transform transition-transform duration-300 ease-out lg:translate-x-0\" :class=\"sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'\"><div class=\"flex flex-col h-full\"><!-- Logo --><div class=\"flex items-center justify-between h-16 px-6 border-b border-stone-200/50 dark:border-stone-800/50\"><a href=\"/\" class=\"flex items-center gap-3 group\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></button></div></header><!-- Mobile sidebar overlay --><div x-show=\"sidebarOpen\" x-transition:enter=\"transition-opacity ease-out duration-300\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"transition-opacity ease-in duration-200\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" @click=\"sidebarOpen = false\" class=\"lg:hidden fixed inset-0 z-40 bg-stone-900/60 backdrop-blur-sm\"></div><!-- Sidebar --><aside class=\"fixed top-0 left-0 z-50 h-full bg-white dark:bg-stone-900 border-r border-stone-200/50 dark:border-stone-800/50 transform transition-all duration-300 ease-out lg:translate-x-0\" :class=\"sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 w-72'\" x-init=\"$watch('sidebarCollapsed', val => { if(window.innerWidth >= 1024) $el.style.width = val ? '5rem' : '18rem' }); if(window.innerWidth >= 1024 && sidebarCollapsed) $el.style.width = '5rem'; else $el.style.width = '18rem';\"><div class=\"flex flex-col h-full\"><!-- Logo --><div class=\"flex items-center h-16 px-4 border-b border-stone-200/50 dark:border-stone-800/50\" :class=\"sidebarCollapsed ? 'lg:justify-center' : 'justify-between lg:px-6'\"><a href=\"/\" class=\"flex items-center gap-3 group\" :class=\"sidebarCollapsed && 'lg:justify-center'\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,7 +93,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"text-xl font-display font-bold tracking-tight group-hover:text-emerald-600 transition-colors\">Billie</span></a> <button @click=\"sidebarOpen = false\" class=\"lg:hidden p-2 -mr-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"text-xl font-display font-bold tracking-tight group-hover:text-emerald-600 transition-colors\" :class=\"sidebarCollapsed && 'lg:hidden'\">Billie</span></a> <button @click=\"sidebarOpen = false\" class=\"lg:hidden p-2 -mr-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -121,7 +121,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</nav><!-- Footer --><div class=\"p-4 border-t border-stone-200/50 dark:border-stone-800/50\"><div class=\"flex items-center justify-between\"><div class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-semibold text-sm\">DS</div><div class=\"hidden lg:block\"><p class=\"text-sm font-medium\">Your Business</p><p class=\"text-xs text-stone-500 dark:text-stone-400\">Pro Plan</p></div></div><button @click=\"toggleTheme()\" class=\"hidden lg:flex p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\" title=\"Toggle theme\"><template x-if=\"theme === 'dark'\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</nav><!-- Footer --><div class=\"p-4 border-t border-stone-200/50 dark:border-stone-800/50\"><div class=\"flex items-center\" :class=\"sidebarCollapsed ? 'lg:flex-col lg:gap-3' : 'justify-between'\"><div class=\"flex items-center gap-3\" :class=\"sidebarCollapsed && 'lg:flex-col'\"><div class=\"w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-semibold text-sm\">DS</div><div class=\"hidden lg:block\" :class=\"sidebarCollapsed && 'lg:!hidden'\"><p class=\"text-sm font-medium\">Your Business</p><p class=\"text-xs text-stone-500 dark:text-stone-400\">Pro Plan</p></div></div><div class=\"hidden lg:flex items-center gap-1\" :class=\"sidebarCollapsed && 'lg:flex-col'\"><button @click=\"toggleTheme()\" class=\"p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\" title=\"Toggle theme\"><span class=\"hidden dark:block\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -129,7 +129,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</template><template x-if=\"theme === 'light'\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span> <span class=\"block dark:hidden\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -137,7 +137,15 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</template></button></div></div></div></aside><!-- Main content --><main class=\"lg:pl-72 min-h-screen\"><div class=\"pt-16 lg:pt-0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span></button> <button @click=\"toggleSidebar()\" class=\"p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors\" title=\"Toggle sidebar\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = icons.PanelLeftOpen("w-5 h-5 text-stone-500").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</button></div></div></div></div></aside><!-- Main content --><main class=\"min-h-screen transition-all duration-300\" x-init=\"$watch('sidebarCollapsed', val => { if(window.innerWidth >= 1024) $el.style.paddingLeft = val ? '5rem' : '18rem' }); if(window.innerWidth >= 1024) $el.style.paddingLeft = sidebarCollapsed ? '5rem' : '18rem';\"><div class=\"pt-16 lg:pt-0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -145,7 +153,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></main><!-- Combobox Script -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></main><!-- Combobox Script -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -153,7 +161,7 @@ func Base(title string, activePath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -190,20 +198,20 @@ func navItem(href string, label string, active bool, icon func(string) templ.Com
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 templ.SafeURL
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 163, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 186, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -216,7 +224,20 @@ func navItem(href string, label string, active bool, icon func(string) templ.Com
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" :class=\"sidebarCollapsed && 'lg:justify-center lg:px-3'\" data-label=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 193, Col: 20}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" :title=\"sidebarCollapsed ? $el.dataset.label : ''\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -224,30 +245,30 @@ func navItem(href string, label string, active bool, icon func(string) templ.Com
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<span :class=\"sidebarCollapsed && 'lg:hidden'\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 171, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 197, Col: 56}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if active {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500\" :class=\"sidebarCollapsed && 'lg:hidden'\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -279,33 +300,33 @@ func Public(title string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<!doctype html><html lang=\"en\" class=\"h-full\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!doctype html><html lang=\"en\" class=\"h-full\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 192, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 218, Col: 17}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</title><link rel=\"stylesheet\" href=\"/static/css/output.css\"><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.min.js\" defer></script><script>\n\t\t\t\tif (window.matchMedia('(prefers-color-scheme: dark)').matches) {\n\t\t\t\t\tdocument.documentElement.classList.add('dark');\n\t\t\t\t}\n\t\t\t</script></head><body class=\"min-h-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased\"><!-- Subtle gradient background --><div class=\"fixed inset-0 -z-10 overflow-hidden pointer-events-none\"><div class=\"absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-96 bg-gradient-to-b from-emerald-500/10 dark:from-emerald-500/5 to-transparent\"></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ_7745c5c3_Var8.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</title><link rel=\"stylesheet\" href=\"/static/css/output.css\"><script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.min.js\" defer></script><script>\n\t\t\t\tif (window.matchMedia('(prefers-color-scheme: dark)').matches) {\n\t\t\t\t\tdocument.documentElement.classList.add('dark');\n\t\t\t\t}\n\t\t\t</script></head><body class=\"min-h-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased\"><!-- Subtle gradient background --><div class=\"fixed inset-0 -z-10 overflow-hidden pointer-events-none\"><div class=\"absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-96 bg-gradient-to-b from-emerald-500/10 dark:from-emerald-500/5 to-transparent\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</body></html>")
+		templ_7745c5c3_Err = templ_7745c5c3_Var9.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

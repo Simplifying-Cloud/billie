@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode instead of media query */
+@variant dark (&:where(.dark, .dark *));
+
 /* Google Fonts - Distinctive typography choices */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
@@ -8,4 +11,9 @@
   --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Alpine.js x-cloak - hide elements until Alpine initializes */
+[x-cloak] {
+  display: none !important;
 }

@@ -24,20 +24,30 @@ templ Base(title string, activePath string) {
 			<script src="/static/js/chart.min.js"></script>
 			<!-- Initialize dark mode before page loads to prevent flash -->
 			<script>
-				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-					document.documentElement.classList.add('dark');
-				}
+				(function() {
+					var theme = localStorage.getItem('theme');
+					if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+						document.documentElement.classList.add('dark');
+					} else {
+						document.documentElement.classList.remove('dark');
+					}
+				})();
 			</script>
 		</head>
 		<body
 			class="h-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans antialiased"
 			x-data="{
 				sidebarOpen: false,
+				sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
 				theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
 				toggleTheme() {
 					this.theme = this.theme === 'dark' ? 'light' : 'dark';
 					localStorage.setItem('theme', this.theme);
 					document.documentElement.classList.toggle('dark', this.theme === 'dark');
+				},
+				toggleSidebar() {
+					this.sidebarCollapsed = !this.sidebarCollapsed;
+					localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
 				}
 			}"
 			x-init="document.documentElement.classList.toggle('dark', theme === 'dark')"
@@ -65,12 +75,12 @@ templ Base(title string, activePath string) {
 						@click="toggleTheme()"
 						class="p-2 -mr-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
 					>
-						<template x-if="theme === 'dark'">
+						<span class="hidden dark:block">
 							@icons.Sun("w-5 h-5")
-						</template>
-						<template x-if="theme === 'light'">
+						</span>
+						<span class="block dark:hidden">
 							@icons.Moon("w-5 h-5")
-						</template>
+						</span>
 					</button>
 				</div>
 			</header>
@@ -90,15 +100,16 @@ templ Base(title string, activePath string) {
 
 			<!-- Sidebar -->
 			<aside
-				class="fixed top-0 left-0 z-50 h-full w-72 bg-white dark:bg-stone-900 border-r border-stone-200/50 dark:border-stone-800/50 transform transition-transform duration-300 ease-out lg:translate-x-0"
-				:class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+				class="fixed top-0 left-0 z-50 h-full bg-white dark:bg-stone-900 border-r border-stone-200/50 dark:border-stone-800/50 transform transition-all duration-300 ease-out lg:translate-x-0"
+				:class="sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 w-72'"
+				x-init="$watch('sidebarCollapsed', val => { if(window.innerWidth >= 1024) $el.style.width = val ? '5rem' : '18rem' }); if(window.innerWidth >= 1024 && sidebarCollapsed) $el.style.width = '5rem'; else $el.style.width = '18rem';"
 			>
 				<div class="flex flex-col h-full">
 					<!-- Logo -->
-					<div class="flex items-center justify-between h-16 px-6 border-b border-stone-200/50 dark:border-stone-800/50">
-						<a href="/" class="flex items-center gap-3 group">
+					<div class="flex items-center h-16 px-4 border-b border-stone-200/50 dark:border-stone-800/50" :class="sidebarCollapsed ? 'lg:justify-center' : 'justify-between lg:px-6'">
+						<a href="/" class="flex items-center gap-3 group" :class="sidebarCollapsed && 'lg:justify-center'">
 							@icons.Logo()
-							<span class="text-xl font-display font-bold tracking-tight group-hover:text-emerald-600 transition-colors">Billie</span>
+							<span class="text-xl font-display font-bold tracking-tight group-hover:text-emerald-600 transition-colors" :class="sidebarCollapsed && 'lg:hidden'">Billie</span>
 						</a>
 						<button
 							@click="sidebarOpen = false"
@@ -118,35 +129,47 @@ templ Base(title string, activePath string) {
 
 					<!-- Footer -->
 					<div class="p-4 border-t border-stone-200/50 dark:border-stone-800/50">
-						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-3">
+						<div class="flex items-center" :class="sidebarCollapsed ? 'lg:flex-col lg:gap-3' : 'justify-between'">
+							<div class="flex items-center gap-3" :class="sidebarCollapsed && 'lg:flex-col'">
 								<div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-display font-semibold text-sm">
 									DS
 								</div>
-								<div class="hidden lg:block">
+								<div class="hidden lg:block" :class="sidebarCollapsed && 'lg:!hidden'">
 									<p class="text-sm font-medium">Your Business</p>
 									<p class="text-xs text-stone-500 dark:text-stone-400">Pro Plan</p>
 								</div>
 							</div>
-							<button
-								@click="toggleTheme()"
-								class="hidden lg:flex p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-								title="Toggle theme"
-							>
-								<template x-if="theme === 'dark'">
-									@icons.Sun("w-5 h-5 text-stone-500")
-								</template>
-								<template x-if="theme === 'light'">
-									@icons.Moon("w-5 h-5 text-stone-500")
-								</template>
-							</button>
+							<div class="hidden lg:flex items-center gap-1" :class="sidebarCollapsed && 'lg:flex-col'">
+								<button
+									@click="toggleTheme()"
+									class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+									title="Toggle theme"
+								>
+									<span class="hidden dark:block">
+										@icons.Sun("w-5 h-5 text-stone-500")
+									</span>
+									<span class="block dark:hidden">
+										@icons.Moon("w-5 h-5 text-stone-500")
+									</span>
+								</button>
+								<button
+									@click="toggleSidebar()"
+									class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+									title="Toggle sidebar"
+								>
+									@icons.PanelLeftOpen("w-5 h-5 text-stone-500")
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</aside>
 
 			<!-- Main content -->
-			<main class="lg:pl-72 min-h-screen">
+			<main
+				class="min-h-screen transition-all duration-300"
+				x-init="$watch('sidebarCollapsed', val => { if(window.innerWidth >= 1024) $el.style.paddingLeft = val ? '5rem' : '18rem' }); if(window.innerWidth >= 1024) $el.style.paddingLeft = sidebarCollapsed ? '5rem' : '18rem';"
+			>
 				<div class="pt-16 lg:pt-0">
 					{ children... }
 				</div>
@@ -166,11 +189,14 @@ templ navItem(href string, label string, active bool, icon func(string) templ.Co
 			templ.KV("bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm", active),
 			templ.KV("text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100", !active),
 		}
+		:class="sidebarCollapsed && 'lg:justify-center lg:px-3'"
+		data-label={ label }
+		:title="sidebarCollapsed ? $el.dataset.label : ''"
 	>
 		@icon(iconClass(active))
-		<span>{ label }</span>
+		<span :class="sidebarCollapsed && 'lg:hidden'">{ label }</span>
 		if active {
-			<div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+			<div class="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500" :class="sidebarCollapsed && 'lg:hidden'"></div>
 		}
 	</a>
 }

@@ -1,4 +1,4 @@
-.PHONY: dev build templ css run clean
+.PHONY: dev build templ css run clean migrate-up migrate-down migrate-status sqlc setup
 
 # Development with live reload (run all in parallel)
 dev:
@@ -39,3 +39,21 @@ clean:
 	rm -rf bin/
 	rm -f static/css/output.css
 	find . -name "*_templ.go" -delete
+
+# Database migrations
+migrate-up:
+	goose -dir internal/database/migrations sqlite3 ./billie.db up
+
+migrate-down:
+	goose -dir internal/database/migrations sqlite3 ./billie.db down
+
+migrate-status:
+	goose -dir internal/database/migrations sqlite3 ./billie.db status
+
+# Generate SQLC code
+sqlc:
+	cd internal/database && sqlc generate
+
+# Full setup (run after cloning)
+setup: sqlc migrate-up templ css
+	@echo "Setup complete! Run 'make dev' to start development."
